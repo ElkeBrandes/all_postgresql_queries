@@ -1,0 +1,1 @@
+-- join the 2015 yields from table county_adj_yields_2015 to the data needed from heaton_results
