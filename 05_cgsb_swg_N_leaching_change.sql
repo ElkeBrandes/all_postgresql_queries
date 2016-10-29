@@ -19,29 +19,49 @@ CREATE INDEX dndc_swg_mu ON isu_swg_results_proc (mukey);
 -- ave no3 leaching of swg (converted to kg/ha) from isu_swg_results_proc
 
 
-DROP TABLE IF EXISTS "05_dndc_clumu_cgsb_swg_2012_2015";
-CREATE TABLE "05_dndc_clumu_cgsb_swg_2012_2015"
-AS WITH cgsb_table AS(
-SELECT DISTINCT ON (t1.cluid_mukey)
+DROP TABLE IF EXISTS "05_dndc_clumu_cgsb_swg";
+CREATE TABLE "05_dndc_clumu_cgsb_swg"
+AS WITH 
+cgsb_table AS(
+SELECT
+t1.fips,
 t1.cluid_mukey,
+t2.mukey,
 t1.clumuha,
-t2.ave_no3_leach * 0.4536 * 2.471 AS ave_no3_leach_ha_cgsb,
+t2.ave_no3_leach * 0.4536 * 2.471 AS ave_no3_leach_ha_cgsb
 FROM "01_clumu_cgsb_profit_2011_2014_mean" as t1
 JOIN isu_cgsb_clumu_proc as t2 on t1.cluid_mukey = t2.cluid_mukey
 ORDER BY t1.cluid_mukey
-)
+),
+swg_7500_table AS(
+SELECT
+ave_no3_leach * 0.4536 * 2.471 AS ave_no3_leach_ha_swg_7500
+FROM isu_swg_results_proc WHERE yld_tag = 7500
+),
+swg_10000_table AS(
+SELECT
+ave_no3_leach * 0.4536 * 2.471 AS ave_no3_leach_ha_swg_10000
+FROM isu_swg_results_proc WHERE yld_tag = 10000
+),
+swg_12500_table AS(
+SELECT
+ave_no3_leach * 0.4536 * 2.471 AS ave_no3_leach_ha_swg_12500
+FROM isu_swg_results_proc WHERE yld_tag = 12500
+),
+
 SELECT 
 t1.*,
-t2.ave_no3_leach * 0.4536 * 2.471 AS ave_no3_leach_ha_swg,
+t2.ave_no3_leach * 0.4536 * 2.471 AS ave_no3_leach_ha_swg
+),
 FROM cgsb_table as t1
-JOIN "isu_swg_results_proc" as t2 on t1.cluid_mukey = t2.cluid_mukey;
+JOIN "isu_swg_results_proc" as t2 on t1.mukey = t2.mukey;
 
 
 -- add a column to enter the no3 leaching values for the profit optimized scenario:
 -- ave_no3_leach_po for profit optimized (all areas where mean profit > 0 goes into swg)
 -- add a column to enter the no3 leaching values for the water quality optimized scenario
 -- ave_no3_leach_wo for water quality optimized (all areas where no3 leaching >62 goes into swg)
-
+/*
 ALTER TABLE "05_dndc_clumu_iowa_cgsb_swg_profit_2011_2014"
 ADD COLUMN ave_no3_leach_po NUMERIC;
 UPDATE "05_dndc_clumu_iowa_cgsb_swg_profit_2011_2014"
