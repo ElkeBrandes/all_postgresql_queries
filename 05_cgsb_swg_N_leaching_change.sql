@@ -18,7 +18,7 @@ CREATE INDEX dndc_swg_mu ON isu_swg_results_proc (mukey);
 -- ave no3 leaching of CGSB (converted to kg/ha) from isu_cgsb_clumu_proc
 -- ave no3 leaching of swg (converted to kg/ha) from isu_swg_results_proc
 
-
+/*
 DROP TABLE IF EXISTS "05_dndc_clumu_cgsb_swg";
 CREATE TABLE "05_dndc_clumu_cgsb_swg"
 AS WITH 
@@ -70,45 +70,65 @@ t1.*,
 t2.ave_no3_leach_ha_swg_12500
 FROM swg_table2 as t1
 JOIN swg_12500_table as t2 on t1.mukey = t2.mukey;
-
+*/
 
 -- add a column to enter the no3 leaching values for the profit optimized scenario:
--- ave_no3_leach_po for profit optimized (all areas where mean profit > 0 goes into swg)
+-- ave_no3_leach_po for profit optimized (all areas where mean profit < -250 goes into swg)
 -- add a column to enter the no3 leaching values for the water quality optimized scenario
--- ave_no3_leach_wo for water quality optimized (all areas where no3 leaching >62 goes into swg)
+-- ave_no3_leach_wo for water quality optimized (all areas where no3 leaching >100 go into swg)
 /*
 ALTER TABLE "05_dndc_clumu_cgsb_swg"
-ADD COLUMN ave_no3_leach_po NUMERIC;
+ADD COLUMN ave_no3_leach_po_7500 NUMERIC;
 ALTER TABLE "05_dndc_clumu_cgsb_swg"
-ADD COLUMN ave_no3_leach_wo NUMERIC;
-
+ADD COLUMN ave_no3_leach_po_10000 NUMERIC;
+ALTER TABLE "05_dndc_clumu_cgsb_swg"
+ADD COLUMN ave_no3_leach_po_12500 NUMERIC;
+ALTER TABLE "05_dndc_clumu_cgsb_swg"
+ADD COLUMN ave_no3_leach_wo_7500 NUMERIC;
+ALTER TABLE "05_dndc_clumu_cgsb_swg"
+ADD COLUMN ave_no3_leach_wo_10000 NUMERIC;
+ALTER TABLE "05_dndc_clumu_cgsb_swg"
+ADD COLUMN ave_no3_leach_wo_12500 NUMERIC;
+*/
+/*
 UPDATE "05_dndc_clumu_cgsb_swg"
 SET 
-ave_no3_leach_po = ave_no3_leach_ha_cs where mean_profit_ha >= 0,
-ave_no3_leach_po = ave_no3_leach_ha_swg where mean_profit_ha < 0,
-ave_no3_leach_wo = ave_no3_leach_ha_cs where ave_no3_leach_ha_cs <= 62,
-ave_no3_leach_wo = ave_no3_leach_ha_swg where ave_no3_leach_ha_cs > 62;
+ave_no3_leach_po_7500 = CASE WHEN mean_profit_ha >= -250 THEN ave_no3_leach_ha_cgsb ELSE ave_no3_leach_ha_swg_7500 END,
+ave_no3_leach_po_10000 = CASE WHEN mean_profit_ha >= -250 THEN ave_no3_leach_ha_cgsb ELSE ave_no3_leach_ha_swg_10000 END,
+ave_no3_leach_po_12500 = CASE WHEN mean_profit_ha >= -250 THEN ave_no3_leach_ha_cgsb ELSE ave_no3_leach_ha_swg_12500 END,
+ave_no3_leach_wo_7500 = CASE WHEN ave_no3_leach_ha_cgsb <= 100 THEN ave_no3_leach_ha_cgsb ELSE ave_no3_leach_ha_swg_7500 END,
+ave_no3_leach_wo_10000 = CASE WHEN ave_no3_leach_ha_cgsb <= 100 THEN ave_no3_leach_ha_cgsb ELSE ave_no3_leach_ha_swg_10000 END,
+ave_no3_leach_wo_12500 = CASE WHEN ave_no3_leach_ha_cgsb <= 100 THEN ave_no3_leach_ha_cgsb ELSE ave_no3_leach_ha_swg_12500 END;
 
+
+-- test for errors in the data set:
+select sum(clumuha) from "05_dndc_clumu_cgsb_swg" where ave_no3_leach_ha_cgsb is null;
+-- result: 22866 ha
+
+select sum(clumuha) from "05_dndc_clumu_cgsb_swg" where mean_profit_ha is not null;
+-- result: 9370307 ha
 */
+-- test for area below/above cut offs:
+select sum(clumuha) from "05_dndc_clumu_cgsb_swg" where mean_profit_ha < -250;
+select sum(clumuha) from "05_dndc_clumu_cgsb_swg" where mean_profit_ha < 0;
+select sum(clumuha) from "05_dndc_clumu_cgsb_swg" where ave_no3_leach_ha_cgsb > 100;
+select sum(clumuha) from "05_dndc_clumu_cgsb_swg" where ave_no3_leach_ha_cgsb > 50;
 
-
---select sum(clumuha) from "05_dndc_clumu_iowa_cgsb_swg_profit_2011_2014" where ave_no3_leach_ha_cs is null;
--- result: 70703.22
-
--- select sum(clumuacres) from "05_dndc_clumu_iowa_cgsb_swg_2011_2014" where mean_profit_ha is not null;
--- result: 1845724.62
-
--- take sums for Iowa (in Mg) for the BAU, profit optimitzation and water quality optimization scenarios:
+-- take sums for Iowa (in Mg) for the BAU, profit optimization and water quality optimization scenarios:
 /*
-DROP TABLE IF EXISTS "05_dndc_sums_iowa_cgsb_2011_2014";
-CREATE TABLE "05_dndc_sums_iowa_cgsb_2011_2014"
+DROP TABLE IF EXISTS "05_dndc_no3_leach_sums_iowa_scenarios";
+CREATE TABLE "05_dndc_no3_leach_sums_iowa_scenarios"
 AS SELECT
-(sum(ave_no3_leach_ha_cs * clumuha)) / 1000  as sum_ave_no3_leach_cs_t,
-(sum(ave_no3_leach_po * clumuha)) / 1000  as sum_ave_no3_leach_po_t,
-(sum(ave_no3_leach_wo * clumuha)) / 1000  as sum_ave_no3_leach_wo_t
-FROM "05_dndc_clumu_iowa_cgsb_swg_profit_2011_2014";
-*/
+(sum(ave_no3_leach_ha_cgsb * clumuha)) / 1000  as sum_ave_no3_leach_cgsb,
+(sum(ave_no3_leach_po_7500 * clumuha)) / 1000  as sum_ave_no3_leach_po_7500,
+(sum(ave_no3_leach_po_10000 * clumuha)) / 1000  as sum_ave_no3_leach_po_10000,
+(sum(ave_no3_leach_po_12500 * clumuha)) / 1000  as sum_ave_no3_leach_po_12500,
+(sum(ave_no3_leach_wo_7500 * clumuha)) / 1000  as sum_ave_no3_leach_wo_7500,
+(sum(ave_no3_leach_wo_10000 * clumuha)) / 1000  as sum_ave_no3_leach_wo_10000,
+(sum(ave_no3_leach_wo_12500 * clumuha)) / 1000  as sum_ave_no3_leach_wo_12500
+FROM "05_dndc_clumu_cgsb_swg";
 
+*/
 -- extract data of Carroll county
 /*
 DROP TABLE IF EXISTS "05_dndc_clumu_cgsb_2011_2014_ia027";
