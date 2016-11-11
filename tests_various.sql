@@ -4,11 +4,11 @@
 -- SELECT count(*) FROM crop_budgets_per_clumu_2015
 -- SELECT * FROM clu_rents_twp_county WHERE cluid = '6959242'
 
-SELECT count(cluid_mukey) FROM isu_cgsb_clumu_proc;
+SELECT count(DISTINCT cluid_mukey) FROM "05_dndc_clumu_cgsb_swg";
 SELECT count(DISTINCT mean_profit_ha) FROM clumu_cgsb_profit_2011_2014_mean;
 SELECT count(*) FROM "05_dndc_clumu_swg_leach_unprofit";
 
-SELECT sum(clumuha) FROM "01_clumu_cgsb_profit_2011_2014_mean";
+SELECT sum(acres) FROM clumu_cgsb_profit_2012_2015 WHERE profit_csr2 IS NULL;
 SELECT sum(clumuha) FROM "02_clumu_cgsb_profit_switch2"
 
 -- to count the clu in the whole state:  
@@ -27,7 +27,7 @@ SELECT pg_database_size(current_database());
 --getting the size of a table:
 
 
-select pg_relation_size('isu_cgsb_clumu_proc');
+select pg_relation_size('05_dndc_clumu_cgsb_swg');
 select pg_relation_size('05_dndc_clumu_iowa_cgsb_swg_2011_2014');
 
 /*
@@ -98,3 +98,6 @@ UPDATE clumu_cgsb_profit_2012_2015
 SET cluid_mukey = cluid || mukey;
 
 SELECT count(DISTINCT cluid_mukey) FROM clumu_cgsb_profit_2011_2014;
+
+SELECT COUNT(*) FROM clumu_cgsb_profit_2011_2014 WHERE clumuacres = 0 AND year = '2011';
+SELECT SUM(acres) FROM clumu_cgsb_profit_2012_2015 WHERE yield IS NULL AND year = '2012';

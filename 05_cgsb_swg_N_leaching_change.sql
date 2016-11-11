@@ -107,7 +107,7 @@ select sum(clumuha) from "05_dndc_clumu_cgsb_swg" where ave_no3_leach_ha_cgsb is
 
 select sum(clumuha) from "05_dndc_clumu_cgsb_swg" where mean_profit_ha is not null;
 -- result: 9370307 ha
-
+select sum(clumuha) from "05_dndc_clumu_cgsb_swg";
 -- test for area below/above cut offs:
 select sum(clumuha) from "05_dndc_clumu_cgsb_swg" where mean_profit_ha < -250;
 -- 876356

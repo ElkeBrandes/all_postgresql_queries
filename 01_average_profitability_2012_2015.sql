@@ -1,12 +1,12 @@
 
 -- add cluid_mukey as a unique identifyer to the original table
-/*
+
 ALTER TABLE clumu_cgsb_profit_2012_2015
 ADD COLUMN cluid_mukey TEXT;
 
 UPDATE clumu_cgsb_profit_2012_2015
 SET cluid_mukey = cluid || mukey;
-*/
+
 -- calculate mean profits for each polygon in a new table
 -- calculate standard deviation as a measure of variability 
 -- convert to metric system
