@@ -11,7 +11,7 @@ DELETE FROM swg_scenarios
 WHERE "FIPS" = 'NULL' OR "FIPS" = 'FIPS';
 */
 
-
+/*
 DROP TABLE IF EXISTS "12_swg_areas_county";
 CREATE TABLE "12_swg_areas_county" AS 
 WITH min_16_table AS (
@@ -46,16 +46,18 @@ FROM swg_scenarios
 WHERE "IN_SWG_2ND_6_10000_20" = 'TRUE' 
 GROUP BY "FIPS"
 ),
-fips_table AS (
+total_area_table AS (
 SELECT DISTINCT
-"FIPS"
-FROM swg_scenarios
+"FIPS",
+SUM("SHAPE_AREA"::NUMERIC)*0.0001 AS total_ha
+FROM swg_scenarios 
+GROUP BY "FIPS"
 ),
 fips_min_16_table AS (
 SELECT 
-t1."FIPS",
+t1.*,
 t2.in_swg_min_16
-FROM fips_table AS t1
+FROM total_area_table AS t1
 LEFT JOIN min_16_table AS t2 ON t1."FIPS" = t2."FIPS"
 ),
 fips_16_table AS (
@@ -78,3 +80,14 @@ t2.in_swg_2nd_6
 FROM fips_16_6_table AS t1
 LEFT JOIN "2nd_6_table" AS t2 ON t1."FIPS" = t2."FIPS";
 
+*/
+
+/*
+UPDATE "12_swg_areas_county"
+SET 
+in_swg_min_16 = 0 WHERE in_swg_min_16 IS NULL;
+*/
+
+UPDATE "12_swg_areas_county"
+SET 
+in_swg_min_6 = 0 WHERE in_swg_min_6 IS NULL;
