@@ -42,7 +42,7 @@ GROUP BY year, rent_csr2_round;
 
 
 -- this query is not working ...
-
+/*
 DROP TABLE IF EXISTS "01_county_cash_rents";
 CREATE TABLE "01_county_cash_rents"
 AS WITH 
@@ -140,38 +140,27 @@ SELECT
 t1.*,
 t2.rent_csr2
 FROM csr_table AS t1
-LEFT JOIN csr2_table AS t2 ON t1.fips = t2.fips;
+LEFT JOIN csr2_table AS t2 ON t1.fips = t2.fips and t1.year = t2.year;
 
-/*
+*/
+
+-- join with the survey cash rent values and calculate the % difference
 
 DROP TABLE IF EXISTS "01_county_cash_rents_comp";
 CREATE TABLE "01_county_cash_rents_comp"
 AS SELECT
 t1.*,
-t2.nass_rent AS survey_rent,
+t2.nass_rent AS survey_rent
 FROM "01_county_cash_rents" AS t1
 LEFT JOIN cnty_rent_per_csr_pt_2010_2015 AS t2 ON t1.fips = t2.fips AND t1.year = t2.year;
-*/
 
+ALTER TABLE "01_county_cash_rents_comp"
+ADD COLUMN diff_csr NUMERIC;
+ALTER TABLE "01_county_cash_rents_comp"
+ADD COLUMN diff_csr2 NUMERIC;
 
+UPDATE "01_county_cash_rents_comp"
+SET
+diff_csr = (rent_csr - survey_rent)*100 / survey_rent,
+diff_csr2 = (rent_csr2 - survey_rent)*100 / survey_rent;
 
-
-/*
-UNION
-t2.rent_csr_2013,
-t3.rent_csr_2014,
-t4.rent_csr_2015,
-t5.rent_csr2_2012,
-t6.rent_csr2_2013,
-t7.rent_csr2_2014,
-t8.rent_csr2_2015
-FROM csr_table_1 AS t1
-LEFT JOIN csr_table_2 AS t2 ON t1.fips = t2.fips
-LEFT JOIN csr_table_3 AS t3 ON t1.fips = t3.fips
-LEFT JOIN csr_table_4 AS t4 ON t1.fips = t4.fips
-LEFT JOIN csr_table_5 AS t5 ON t1.fips = t5.fips
-LEFT JOIN csr_table_6 AS t6 ON t1.fips = t6.fips
-LEFT JOIN csr_table_7 AS t7 ON t1.fips = t7.fips
-LEFT JOIN csr_table_8 AS t8 ON t1.fips = t8.fips;
-
-*/
