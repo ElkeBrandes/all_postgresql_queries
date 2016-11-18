@@ -38,103 +38,30 @@ rent_csr2_round
 FROM rents_rounded
 GROUP BY year, rent_csr2_round;
 */
+
 -- check average cash rent per county
+-- when calculating the area weighted average cash rents per county I need to make sure I sum up only the area that
+-- has a cash rent attributed. 
 
 
--- this query is not working ...
-/*
 DROP TABLE IF EXISTS "01_county_cash_rents";
 CREATE TABLE "01_county_cash_rents"
 AS WITH 
-csr_table_1 AS (
-SELECT
-fips,
-year,
-sum(clu_cash_rent_csr * acres)/sum(acres) AS rent_csr
-FROM clumu_cgsb_profit_2012_2015
-WHERE year = '2012'
-GROUP BY fips, year
-),
-csr_table_2 AS (
-SELECT
-fips,
-year,
-sum(clu_cash_rent_csr * acres)/sum(acres) AS rent_csr
-FROM clumu_cgsb_profit_2012_2015 as t1
-WHERE year = '2013'
-GROUP BY fips, year
-),
-csr_table_3 AS (
-SELECT
-fips,
-year,
-sum(clu_cash_rent_csr * acres)/sum(acres) AS rent_csr
-FROM clumu_cgsb_profit_2012_2015
-WHERE year = '2014'
-GROUP BY fips, year
-),
-csr_table_4 AS (
-SELECT
-fips,
-year,
-sum(clu_cash_rent_csr * acres)/sum(acres) AS rent_csr
-FROM clumu_cgsb_profit_2012_2015
-WHERE year = '2015'
-GROUP BY fips, year
-),
-csr_table_5 AS (
-SELECT
-fips,
-year,
-sum(clu_cash_rent_csr2 * acres)/sum(acres) AS rent_csr2
-FROM clumu_cgsb_profit_2012_2015
-WHERE year = '2012'
-GROUP BY fips, year
-),
-csr_table_6 AS (
-SELECT
-fips,
-year,
-sum(clu_cash_rent_csr2 * acres)/sum(acres) AS rent_csr2
-FROM clumu_cgsb_profit_2012_2015
-WHERE year = '2013'
-GROUP BY fips, year
-),
-csr_table_7 AS (
-SELECT
-fips,
-year,
-sum(clu_cash_rent_csr2 * acres)/sum(acres) AS rent_csr2
-FROM clumu_cgsb_profit_2012_2015
-WHERE year = '2014'
-GROUP BY fips, year
-),
-csr_table_8 AS (
-SELECT 
-fips,
-year,
-sum(clu_cash_rent_csr2 * acres)/sum(acres) AS rent_csr2
-FROM clumu_cgsb_profit_2012_2015
-WHERE year = '2015'
-GROUP BY fips, year
-),
 csr_table AS (
-SELECT * FROM csr_table_1
-UNION
-SELECT * FROM csr_table_2
-UNION 
-SELECT * FROM csr_table_3
-UNION
-SELECT * FROM csr_table_4
+SELECT
+fips,
+year,
+sum(clu_cash_rent_csr * acres)/sum(acres) AS rent_csr
+FROM clumu_cgsb_profit_2012_2015
+GROUP BY fips, year
 ),
 csr2_table AS (
-SELECT * FROM csr_table_5
-UNION
-SELECT * FROM csr_table_6
-UNION 
-SELECT * FROM csr_table_7
-UNION
-SELECT * FROM csr_table_8
+SELECT
+fips,
+year,
+sum(clu_cash_rent_csr2 * acres)/sum(acres) AS rent_csr2
+FROM clumu_cgsb_profit_2012_2015
+GROUP BY fips, year
 )
 SELECT 
 t1.*,
@@ -142,7 +69,7 @@ t2.rent_csr2
 FROM csr_table AS t1
 LEFT JOIN csr2_table AS t2 ON t1.fips = t2.fips and t1.year = t2.year;
 
-*/
+
 
 -- join with the survey cash rent values and calculate the % difference
 
@@ -161,6 +88,6 @@ ADD COLUMN diff_csr2 NUMERIC;
 
 UPDATE "01_county_cash_rents_comp"
 SET
-diff_csr = (rent_csr - survey_rent)*100 / survey_rent,
-diff_csr2 = (rent_csr2 - survey_rent)*100 / survey_rent;
+diff_csr = round((rent_csr - survey_rent)*100 / survey_rent, 1),
+diff_csr2 = round((rent_csr2 - survey_rent)*100 / survey_rent, 1);
 
