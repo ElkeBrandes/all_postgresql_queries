@@ -1,12 +1,12 @@
 
 -- add cluid_mukey as a unique identifyer to the original table
-
+/*
 ALTER TABLE clumu_cgsb_profit_2012_2015
 ADD COLUMN cluid_mukey TEXT;
 
 UPDATE clumu_cgsb_profit_2012_2015
 SET cluid_mukey = cluid || mukey;
-
+*/
 -- calculate mean profits for each polygon in a new table
 -- calculate standard deviation as a measure of variability 
 -- convert to metric system
@@ -14,7 +14,7 @@ SET cluid_mukey = cluid || mukey;
 DROP TABLE IF EXISTS "01_clumu_cgsb_profit_2012_2015_mean";
 CREATE TABLE "01_clumu_cgsb_profit_2012_2015_mean"
 AS SELECT
-fips_crent,
+fips,
 cluid,
 cluid_mukey,
 acres / 2.471 as clumuha,
@@ -25,7 +25,7 @@ GROUP BY cluid_mukey, cluid, acres, fips_crent;
 */
 
 -- for distribution, round profits and std deviation to the dollar and aggregate
-
+/*
 ALTER TABLE "01_clumu_cgsb_profit_2012_2015_mean"
 ADD COLUMN profit_mean_ha_rounded FLOAT;
 ALTER TABLE "01_clumu_cgsb_profit_2012_2015_mean"
@@ -53,7 +53,7 @@ GROUP BY profit_mean_ha_rounded;
 -- create distributions for each year 
 -- convert into metric system
 -- aggregate to profitability
-
+*/
 -- 2012:
 /*
 DROP TABLE IF EXISTS "01_profit_rounded_aggregated_2012";
@@ -127,27 +127,27 @@ GROUP BY profit_2015_ha_rounded;
 */
 
 -- create a table with the area in corn and soybean and the area below break even profit for each county 
-
+/*
 DROP TABLE IF EXISTS "01_profit_below_breakeven_total_area_county_12_15";
 CREATE TABLE "01_profit_below_breakeven_total_area_county_12_15"
 AS WITH profit_below_breakeven AS (
 SELECT 
-fips_crent,
+fips,
 sum(clumuha) AS area
 FROM "01_clumu_cgsb_profit_2012_2015_mean"
 WHERE mean_profit_ha < 0
-GROUP BY fips_crent),
+GROUP BY fips),
 total_area AS (
 SELECT
-fips_crent,
+fips,
 sum(clumuha) AS total_area
 FROM "01_clumu_cgsb_profit_2012_2015_mean"
-GROUP BY fips_crent)
+GROUP BY fips)
 SELECT 
 t1.*,
 t2.total_area
 FROM profit_below_breakeven AS t1
-JOIN total_area AS t2 ON t1.fips_crent = t2.fips_crent;
+JOIN total_area AS t2 ON t1.fips = t2.fips;
 
 -- add a column to calculate % of area below break EVENT
 
@@ -162,8 +162,10 @@ SET percent_area = (area / total_area)*100;
 DROP TABLE IF EXISTS "01_profit_mean_county_2012_2015";
 CREATE TABLE "01_profit_mean_county_2012_2015"
 AS SELECT
-fips_crent,
+fips,
 sum(mean_profit_ha * clumuha)/sum(clumuha) AS mean_county_profit
 FROM "01_clumu_cgsb_profit_2012_2015_mean"
-GROUP BY fips_crent;
+GROUP BY fips;
+*/
 
+-- extract 
