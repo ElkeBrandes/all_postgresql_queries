@@ -7,4 +7,4 @@ FROM chorizon AS ch
 LEFT JOIN component AS c ON ch.cokey = c.cokey
 LEFT JOIN mapunit AS m ON c.mukey = m.mukey
 LEFT JOIN legend AS l ON m.lkey = l.lkey
-WHERE l.areasymbol = 'IA*' AND l.areatypename = 'Non-MLRA Soil Survey Area' -- always true for SSURGO
+WHERE l.areasymbol LIKE 'IA%' AND l.areatypename = 'Non-MLRA Soil Survey Area' -- always true for SSURGO
